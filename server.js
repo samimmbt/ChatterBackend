@@ -62,13 +62,28 @@ app.get('/email/:id', (req, res) => {
   }
 
 });
-app.post('/',(req,res)=>{
+app.post('/', (req, res) => {
   console.log(req.body);
   const data = req.body
-  const result = sql`insert into "user"(name,email,userid,token) values ('${data.name}','${data.email}','${data.userId}','${data.token}')`
-  return result
+  if (data) {
+    const result = post(data)
+    if(result){
+    res.send().status(202)
+    }else{
+      res.send().status(500)//server error
+    }
+  }else{
+    return null
+  }
 })
-
+async function post(data) {
+  try {
+    const result = await sql`insert into "user"(name,email,userid,token) values (${data.name},${data.email},${data.userId},${data.token})`
+    return result
+  } catch (e) {
+    console.log(e)
+  }
+}
 // app.put('')
 
 http.listen(PORT, () => {
