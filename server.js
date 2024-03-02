@@ -1,5 +1,6 @@
 const express = require('express');
 require('dotenv').config();
+const postgres = require('postgres');
 const app = express();
 const PORT = 3000;
 const cors = require('cors');
@@ -61,8 +62,14 @@ app.get('/email/:id', (req, res) => {
   }
 
 });
+app.post('/',(req,res)=>{
+  console.log(req.body);
+  const data = req.body
+  const result = sql`insert into "user"(name,email,userid,token) values ('${data.name}','${data.email}','${data.userId}','${data.token}')`
+  return result
+})
 
-app.put('')
+// app.put('')
 
 http.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
