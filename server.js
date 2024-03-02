@@ -31,10 +31,18 @@ const sql = postgres({
 
 socketIO.on('connection', (socket) => {
   console.log(`⚡: ${socket.id} user just connected!`);
+
+  socket.on('message', (data) => {
+    console.log(data);
+    socketIO.emit('messageResponse', data);
+  });
+
   socket.on('disconnect', () => {
     console.log('🔥: A user disconnected');
   });
 });
+
+
 
 app.get('/api', (req, res) => {
   res.json({
@@ -53,6 +61,8 @@ app.get('/email/:id', (req, res) => {
   }
 
 });
+
+app.put('')
 
 http.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
