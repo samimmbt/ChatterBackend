@@ -31,7 +31,25 @@ const sql = postgres({
 });
 
 socketIO.on('connection', (socket) => {
-  console.log(`⚡: ${socket.id} user just connected!`);
+  console.log(`:)) : ${socket.id} user just connected!`);
+
+  socket.on('login', (data) => {
+    if (data) {
+      post(data).then((result) => {
+        if (result) {
+          const resData = {
+            name: data.name,
+            userId: data.userId,
+            logged: true
+          }
+          socketIO.emit('loginRes', resData)
+        }
+        console.log("Data inserted successfully:", result);
+      }).catch((error) => {
+        console.error("Error inserting data:", error);
+      })
+    }
+  })
 
   socket.on('message', (data) => {
     console.log(data);
@@ -39,7 +57,7 @@ socketIO.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('🔥: A user disconnected');
+    console.log('-_- : A user disconnected');
   });
 });
 
@@ -62,26 +80,48 @@ app.get('/email/:id', (req, res) => {
   }
 
 });
-app.post('/', (req, res) => {
-  console.log(req.body);
-  const data = req.body
-  if (data) {
-    const result = post(data)
-    if(result){
-    res.send().status(202)
-    }else{
-      res.send().status(500)//server error
-    }
-  }else{
-    return null
+app.get('/user/:id', (req, res) => {
+  const id = req.params.id;
+  if (id) {
+
   }
-})
+
+});
+
+
+// app.post('/', (req, res) => {
+//   console.log(req.body);
+//   const data = req.body
+//   if (data) {
+//     const result = post(data)
+//     if (result) {
+//       res.send().status(202)
+//     } else {
+//       res.send().status(500)//server error
+//     }
+//   } else {
+//     return null
+//   }
+// })
 async function post(data) {
   try {
-    const result = await sql`insert into "user"(name,email,userid,token) values (${data.name},${data.email},${data.userId},${data.token})`
+    const result = await sql`
+    INSERT INTO "user" (name, email, userid, token)
+    VALUES (${data.name}, ${data.email}, ${data.userId}, ${data.token});`;
+    await sql`INSERT INTO "users" (userid)
+    VALUES (${data.userId});`
     return result
   } catch (e) {
-    console.log(e)
+    console.error(e)
+    throw e;
+  }
+}
+async function getUser(data) {
+  try {
+    const result = await sql`SELECT * from "user" where userid =${data.userid} and email = ${data.email}`
+    return result
+  } catch (e) {
+    console.error(e)
   }
 }
 // app.put('')
